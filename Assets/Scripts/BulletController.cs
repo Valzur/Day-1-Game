@@ -23,19 +23,19 @@ public class BulletController : MonoBehaviour
         this.isEnemy = isEnemy;
     }
     
-    void OnCollisionEnter(Collision other) 
+    void OnTriggerEnter(Collider other) 
     {
         
-        if(!isEnemy && other.collider.GetComponent<Enemy>())
+        if(!isEnemy && other.GetComponent<Enemy>())
         {
-            Enemy enemy = other.collider.GetComponent<Enemy>();
+            Enemy enemy = other.GetComponent<Enemy>();
             enemy.GetDamage(weapon.damage);
             Destroy(gameObject);
         }
 
-        else if(isEnemy && other.collider.GetComponent<Player>())
+        else if(isEnemy && other.GetComponent<Player>())
         {
-            Player player = other.collider.GetComponent<Player>();
+            Player player = other.GetComponent<Player>();
             player.GetDamage(weapon.damage);
             Destroy(gameObject);
         }

@@ -133,7 +133,7 @@ MonoBehaviour:
   shootPoint: {fileID: 7433245145266940487}
   velocity: 5
   camera: {fileID: 0}
-  yOffset: 1
+  yOffset: 10
   cameraVelocity: 4.8
 --- !u!96 &7433245145175163026
 TrailRenderer:

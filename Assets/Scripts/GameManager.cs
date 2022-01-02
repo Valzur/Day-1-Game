@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 [System.Serializable]
 public struct Level
 {
@@ -13,6 +12,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     [SerializeField] Level [] levels;
     [SerializeField] float spawnRadius;
+    [SerializeField] float gameSpeedModifier;
     [SerializeField] Enemy squareEnemyPrefab;
     [SerializeField] Enemy triangleEnemyPrefab;
     int currentLevelNo;
@@ -20,17 +20,19 @@ public class GameManager : MonoBehaviour
     int noOfTriangleEnemiesLeft;
     float spawnRate;
     float timeLeftToSpawn = 0;
+    bool isSimulating = true;
     void Awake() => Instance = this;
     void Start()
     {
         QualitySettings.vSyncCount = 1;
-        ChangeLevel(1);
+        ChangeLevel(0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        SpawnEnemies();
+        if(isSimulating)
+            SpawnEnemies();
     }
 
     void SpawnEnemies()
@@ -38,6 +40,7 @@ public class GameManager : MonoBehaviour
         timeLeftToSpawn -= Time.deltaTime;
         if(timeLeftToSpawn <= 0)
         {
+            timeLeftToSpawn = 1 / spawnRate;
             int randSpawnNo = Random.Range(1, noOfSquareEnemiesLeft + noOfTriangleEnemiesLeft + 1);
             
             Vector3 spawnPoint = Vector3.zero;
@@ -49,6 +52,8 @@ public class GameManager : MonoBehaviour
             
             if(randSpawnNo <= noOfSquareEnemiesLeft)
             {
+                //Shift as we move
+                spawnPoint += Player.Instance.transform.position;
                 //Spawn Square.
                 Instantiate(squareEnemyPrefab, spawnPoint, Quaternion.identity);
                 noOfSquareEnemiesLeft --;
@@ -59,6 +64,16 @@ public class GameManager : MonoBehaviour
                 Instantiate(triangleEnemyPrefab, spawnPoint, Quaternion.identity);
                 noOfTriangleEnemiesLeft --;
             }
+            if(noOfTriangleEnemiesLeft == 0 && noOfSquareEnemiesLeft == 0)
+            {
+                if(currentLevelNo == levels.Length - 1)
+                {
+                    isSimulating = false;
+                    UIManager.Instance.Win();
+                    return;
+                }
+                ChangeLevel(currentLevelNo + 1);
+            }
         }
     }
 
@@ -66,13 +81,16 @@ public class GameManager : MonoBehaviour
     {
         currentLevelNo = NextLevel;
         UIManager.Instance.UpdateLevel(currentLevelNo);
-        spawnRate = 1 / (float)(levels[NextLevel -1].NoOfSquareEnemies + levels[NextLevel -1].NoOfTriangleEnemies);
-        noOfSquareEnemiesLeft = levels[NextLevel -1].NoOfSquareEnemies;
-        noOfTriangleEnemiesLeft = levels[NextLevel -1].NoOfTriangleEnemies;
+        spawnRate = gameSpeedModifier /((float)(levels[NextLevel].NoOfSquareEnemies + levels[NextLevel].NoOfTriangleEnemies));
+        noOfSquareEnemiesLeft = levels[NextLevel].NoOfSquareEnemies;
+        noOfTriangleEnemiesLeft = levels[NextLevel].NoOfTriangleEnemies;
     }
 
     public void Lose()
     {
-
+        isSimulating = false;
+        UIManager.Instance.Lose(currentLevelNo);
     }
+    public void Restart() => SceneManager.LoadScene(1);
+    public void Quit() => Application.Quit();
 }
