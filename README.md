@@ -5,7 +5,7 @@ essentially the game features a simple survival game, controls are WASD and RMB 
 
 ## Installation
 
-Simply download the game from the releases section and run "Day 2 Game.exe", 
+Simply download the game from the releases section and run "Day 1 Game.exe", 
 or clone the entire repo if you'd like the source code :"D
     
 ## Demo
